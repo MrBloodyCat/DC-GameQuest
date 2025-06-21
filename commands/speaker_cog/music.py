@@ -4,7 +4,7 @@ import asyncio
 import subprocess
 import disnake
 from disnake.ext import commands, tasks
-from BANNED_FILES.config import SPEAKER_VOICE_ID, Music_Folder, Ffmpeg_Path
+from BANNED_FILES.config import SPEAKER_VOICE_ID, Music_Folder #Ffmpeg_Path
 
 class MusicPlayer(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -12,7 +12,7 @@ class MusicPlayer(commands.Cog):
         self.voice_client: disnake.VoiceClient | None = None
         self.music_folder = Music_Folder
         self.volume = 0.8
-        self.ffmpeg_path = Ffmpeg_Path
+        #self.ffmpeg_path = Ffmpeg_Path
         self.integration_cog = None  # Для обращения к MusicIntegration
         self.auto_reconnect.start()
 
@@ -55,7 +55,7 @@ class MusicPlayer(commands.Cog):
 
             source = disnake.FFmpegPCMAudio(
                 os.path.join(self.music_folder, file),
-                executable=self.ffmpeg_path,
+                #executable=self.ffmpeg_path,
                 before_options='-hide_banner',
                 options='-loglevel error',
                 stderr=subprocess.DEVNULL
