@@ -11,7 +11,7 @@ class MusicPlayer(commands.Cog):
         self.bot = bot
         self.voice_client: disnake.VoiceClient | None = None
         self.music_folder = Music_Folder
-        self.volume = 0.8
+        self.volume = 0.3
         #self.ffmpeg_path = Ffmpeg_Path
         self.integration_cog = None  # Для обращения к MusicIntegration
         self.auto_reconnect.start()
