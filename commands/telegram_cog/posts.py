@@ -2,7 +2,7 @@ import os
 import asyncio
 import disnake
 from disnake.ext import commands
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, types
 from BANNED_FILES.config import api_id, api_hash, telegram_bot, TELEGRAM_ID, TELEGRAM_DISCORD_CHANNEL_ID, Download_Temp
 
 telegram_client = TelegramClient("telegram_session", api_id, api_hash)
@@ -11,55 +11,93 @@ class TelegramBridge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.message_map = {}  # {telegram_msg_id: discord_msg_id}
+        self.grouped_media = {}  # {grouped_id: [events]}
+        self.grouped_tasks = {}  # {grouped_id: asyncio.Task}
         self.bot.loop.create_task(self.init_telegram())
 
     async def init_telegram(self):
         await self.bot.wait_until_ready()
         try:
             await telegram_client.start(bot_token=telegram_bot)
-            telegram_client.add_event_handler(self.forward_to_discord, events.NewMessage(chats=TELEGRAM_ID))
-            telegram_client.add_event_handler(self.edit_to_discord, events.MessageEdited(chats=TELEGRAM_ID))
-            telegram_client.add_event_handler(self.delete_to_discord, events.MessageDeleted(chats=TELEGRAM_ID))
+            telegram_client.add_event_handler(self.handle_new_message, events.NewMessage(chats=TELEGRAM_ID))
+            telegram_client.add_event_handler(self.handle_edit, events.MessageEdited(chats=TELEGRAM_ID))
+            telegram_client.add_event_handler(self.handle_delete, events.MessageDeleted(chats=TELEGRAM_ID))
             print("Telegram client started successfully!")
             asyncio.create_task(telegram_client.run_until_disconnected())
-        except:
-            pass
+        except Exception as e:
+            print(f"Telegram client start error: {e}")
 
-    async def forward_to_discord(self, event):
-        content = event.text or ""
+    async def handle_new_message(self, event):
+        grouped_id = getattr(event.message, "grouped_id", None)
+
+        if grouped_id:
+            if grouped_id not in self.grouped_media:
+                self.grouped_media[grouped_id] = []
+            self.grouped_media[grouped_id].append(event)
+
+            if grouped_id not in self.grouped_tasks:
+                self.grouped_tasks[grouped_id] = asyncio.create_task(self.finalize_album(grouped_id))
+        else:
+            await self.send_to_discord([event])
+
+    async def finalize_album(self, grouped_id):
+        await asyncio.sleep(2.5)
+        events = self.grouped_media.get(grouped_id, [])
+        if events:
+            await self.send_to_discord(events)
+        self.grouped_media.pop(grouped_id, None)
+        self.grouped_tasks.pop(grouped_id, None)
+
+    async def send_to_discord(self, events):
+        content = ""
         files = []
+        os.makedirs(Download_Temp, exist_ok=True)
 
-        if event.media:
+        for event in events:
             try:
-                os.makedirs(Download_Temp, exist_ok=True)
-                filename = f"{Download_Temp}/telegram_{event.id}"
-                path = await telegram_client.download_media(event.media, file=filename)
-                if path:
-                    files.append(disnake.File(path))
-            except:
-                pass
+                if not content and event.message.message:
+                    content = event.message.message[:2000]
+
+                if event.message.media:
+                    file_path = await self.download_media(event.message)
+                    if file_path:
+                        files.append(disnake.File(file_path))
+            except Exception as e:
+                print(f"Ошибка обработки медиа: {e}")
 
         channel = self.bot.get_channel(TELEGRAM_DISCORD_CHANNEL_ID)
         if not channel:
+            print("Discord канал не найден")
             return
 
         try:
-            discord_msg = await channel.send(content if content else "Media message:", files=files)
-            self.message_map[event.id] = discord_msg.id
+            discord_msg = await channel.send(
+                content=content or None,
+                files=files[:10] or None
+            )
+            self.message_map[events[0].message.id] = discord_msg.id
+        except Exception as e:
+            print(f"Ошибка отправки в Discord: {e}")
+        finally:
+            for f in files:
+                try:
+                    os.remove(f.fp.name)
+                except Exception as e:
+                    print(f"Ошибка удаления файла {f.fp.name}: {e}")
 
-            # Запускаем таймер на 3 минуты, чтобы удалить ID из message_map
-            self.bot.loop.create_task(self.expire_message(event.id, delay=180))
-        except:
-            pass
+    async def download_media(self, message):
+        try:
+            ext = ".jpg" if isinstance(message.media, types.MessageMediaPhoto) else ""
+            return await telegram_client.download_media(
+                message,
+                file=os.path.join(Download_Temp, f"media_{message.id}{ext}")
+            )
+        except Exception as e:
+            print(f"Ошибка загрузки медиа: {e}")
+            return None
 
-        for f in files:
-            try:
-                os.remove(f.fp.name)
-            except:
-                pass
-
-    async def edit_to_discord(self, event):
-        discord_id = self.message_map.get(event.id)
+    async def handle_edit(self, event):
+        discord_id = self.message_map.get(event.message.id)
         if not discord_id:
             return
 
@@ -68,27 +106,23 @@ class TelegramBridge(commands.Cog):
             return
 
         try:
-            dm = await channel.fetch_message(discord_id)
-            await dm.edit(content=event.text or "")
-        except:
-            pass
+            discord_msg = await channel.fetch_message(discord_id)
+            await discord_msg.edit(content=event.message.message or "")
+        except Exception as e:
+            print(f"Ошибка редактирования в Discord: {e}")
 
-    async def delete_to_discord(self, event):
+    async def handle_delete(self, event):
         channel = self.bot.get_channel(TELEGRAM_DISCORD_CHANNEL_ID)
         if not channel:
             return
 
-        for tid in event.deleted_ids:
-            did = self.message_map.get(tid)
-            if not did:
+        for msg_id in event.deleted_ids:
+            discord_id = self.message_map.get(msg_id)
+            if not discord_id:
                 continue
             try:
-                msg = await channel.fetch_message(did)
+                msg = await channel.fetch_message(discord_id)
                 await msg.delete()
-                del self.message_map[tid]
-            except:
-                pass
-
-    async def expire_message(self, telegram_msg_id, delay=180):
-        await asyncio.sleep(delay)
-        self.message_map.pop(telegram_msg_id, None)
+                del self.message_map[msg_id]
+            except Exception as e:
+                print(f"Ошибка удаления сообщения в Discord: {e}")
