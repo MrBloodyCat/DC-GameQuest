@@ -1,1 +1,4 @@
-disnake
+disnake>=2.9.0
+PyNaCl>=1.5.0
+ffmpeg-python>=0.2.0
+telethon
