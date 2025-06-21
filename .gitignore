@@ -3,5 +3,6 @@
 
 
 session_name.session
+telegram_session.session
 session_name.session-journal
 BANNED_FILES/config.py
