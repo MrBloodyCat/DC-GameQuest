@@ -37,6 +37,10 @@ bot.load_extension("commands.messages_cog") # Папка с сообщениям
 
 bot.load_extension("commands.ember_cog") # Папка с ембитам для отпраки
 
+bot.load_extension("commands.events_cog") # Папка с событиями на сервере и боте
+
+bot.load_extension("commands.reaction_cog") # Папка с рекциями на сообщения
+
 # Запуск
 if __name__ == "__main__":
     bot.run(discord_bot)
