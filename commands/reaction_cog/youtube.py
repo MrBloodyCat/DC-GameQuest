@@ -10,10 +10,16 @@ class ReactionYouTube(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: disnake.Message):
-        if message.channel.id == self.target_channel_id and not message.author.bot:
-            for emoji_id in self.emoji_ids:
-                emoji = self.bot.get_emoji(emoji_id)
-                if emoji:
+        if message.channel.id != self.target_channel_id:
+            return  # Пропускаем сообщения вне нужного канала
+
+        # Ставим реакции даже на сообщения от бота
+        for emoji_id in self.emoji_ids:
+            emoji = self.bot.get_emoji(emoji_id)
+            if emoji:
+                try:
                     await message.add_reaction(emoji)
-                else:
-                    print(f"Emoji with ID {emoji_id} not found!")
+                except disnake.HTTPException:
+                    print(f"Не удалось добавить реакцию: {emoji}")
+            else:
+                print(f"Emoji с ID {emoji_id} не найден!")
