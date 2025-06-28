@@ -39,16 +39,18 @@ def format_telegram_message(message_text, entities):
             inserts.append((end, "```"))
         elif isinstance(entity, MessageEntityTextUrl):
             text_part = result[start:end]
-            inserts.append((start, f"[{text_part}]("))
-            inserts.append((end, f"){entity.url}"))
+            markdown = f"[{text_part}]({entity.url})"
+            inserts.append((start, markdown))
+            inserts.append((end, ""))  # удалим оригинал
         elif isinstance(entity, MessageEntityUrl):
             continue
 
     inserts.sort(reverse=True)
-    for pos, mark in inserts:
-        result = result[:pos] + mark + result[pos:]
+    for pos, insert in inserts:
+        result = result[:pos] + insert + result[pos:]
 
     return result
+
 
 class TelegramBridge(commands.Cog):
     def __init__(self, bot):
