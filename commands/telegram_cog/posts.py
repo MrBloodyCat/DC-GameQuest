@@ -12,45 +12,31 @@ def format_telegram_message(message_text, entities):
     if not entities or not message_text:
         return message_text or ""
 
-    result = message_text
-    inserts = []
-
-    for entity in entities:
+    text = list(message_text)
+    for entity in sorted(entities, key=lambda e: e.offset, reverse=True):
         start = entity.offset
         end = entity.offset + entity.length
 
+        segment = ''.join(text[start:end])
+
         if isinstance(entity, MessageEntityBold):
-            inserts.append((start, "**"))
-            inserts.append((end, "**"))
+            text[start:end] = list(f"**{segment}**")
         elif isinstance(entity, MessageEntityItalic):
-            inserts.append((start, "*"))
-            inserts.append((end, "*"))
+            text[start:end] = list(f"*{segment}*")
         elif isinstance(entity, MessageEntityUnderline):
-            inserts.append((start, "__"))
-            inserts.append((end, "__"))
+            text[start:end] = list(f"__{segment}__")
         elif isinstance(entity, MessageEntityStrike):
-            inserts.append((start, "~~"))
-            inserts.append((end, "~~"))
+            text[start:end] = list(f"~~{segment}~~")
         elif isinstance(entity, MessageEntityCode):
-            inserts.append((start, "`"))
-            inserts.append((end, "`"))
+            text[start:end] = list(f"`{segment}`")
         elif isinstance(entity, MessageEntityPre):
-            inserts.append((start, "```"))
-            inserts.append((end, "```"))
+            text[start:end] = list(f"```{segment}```")
         elif isinstance(entity, MessageEntityTextUrl):
-            text_part = result[start:end]
-            markdown = f"[{text_part}]({entity.url})"
-            inserts.append((start, markdown))
-            inserts.append((end, ""))  # удалим оригинал
+            text[start:end] = list(f"[{segment}]({entity.url})")
         elif isinstance(entity, MessageEntityUrl):
             continue
 
-    inserts.sort(reverse=True)
-    for pos, insert in inserts:
-        result = result[:pos] + insert + result[pos:]
-
-    return result
-
+    return ''.join(text)
 
 class TelegramBridge(commands.Cog):
     def __init__(self, bot):
