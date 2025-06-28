@@ -3,16 +3,59 @@ import asyncio
 import disnake
 from disnake.ext import commands
 from telethon import TelegramClient, events, types
-from BANNED_FILES.config import api_id, api_hash, telegram_bot, TELEGRAM_ID, TELEGRAM_DISCORD_CHANNEL_ID, Download_Temp
+from telethon.tl.types import (MessageEntityBold, MessageEntityItalic, MessageEntityTextUrl, MessageEntityUrl, MessageEntityCode, MessageEntityPre, MessageEntityUnderline, MessageEntityStrike)
+from BANNED_FILES.config import (api_id, api_hash, telegram_bot, TELEGRAM_ID, TELEGRAM_DISCORD_CHANNEL_ID, Download_Temp)
 
 telegram_client = TelegramClient("telegram_session", api_id, api_hash)
+
+def format_telegram_message(message_text, entities):
+    if not entities or not message_text:
+        return message_text or ""
+
+    result = message_text
+    inserts = []
+
+    for entity in entities:
+        start = entity.offset
+        end = entity.offset + entity.length
+
+        if isinstance(entity, MessageEntityBold):
+            inserts.append((start, "**"))
+            inserts.append((end, "**"))
+        elif isinstance(entity, MessageEntityItalic):
+            inserts.append((start, "*"))
+            inserts.append((end, "*"))
+        elif isinstance(entity, MessageEntityUnderline):
+            inserts.append((start, "__"))
+            inserts.append((end, "__"))
+        elif isinstance(entity, MessageEntityStrike):
+            inserts.append((start, "~~"))
+            inserts.append((end, "~~"))
+        elif isinstance(entity, MessageEntityCode):
+            inserts.append((start, "`"))
+            inserts.append((end, "`"))
+        elif isinstance(entity, MessageEntityPre):
+            inserts.append((start, "```"))
+            inserts.append((end, "```"))
+        elif isinstance(entity, MessageEntityTextUrl):
+            text_part = result[start:end]
+            inserts.append((start, f"[{text_part}]("))
+            inserts.append((end, f"){entity.url}"))
+        elif isinstance(entity, MessageEntityUrl):
+            continue
+
+    inserts.sort(reverse=True)
+    for pos, mark in inserts:
+        result = result[:pos] + mark + result[pos:]
+
+    return result
 
 class TelegramBridge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.message_map = {}  # {telegram_msg_id: discord_msg_id}
-        self.grouped_media = {}  # {grouped_id: [events]}
-        self.grouped_tasks = {}  # {grouped_id: asyncio.Task}
+        self.message_map = {}
+        self.grouped_media = {}
+        self.grouped_tasks = {}
         self.bot.loop.create_task(self.init_telegram())
 
     async def init_telegram(self):
@@ -56,7 +99,10 @@ class TelegramBridge(commands.Cog):
         for event in events:
             try:
                 if not content and event.message.message:
-                    content = event.message.message[:2000]
+                    content = format_telegram_message(
+                        event.message.message,
+                        event.message.entities
+                    )[:2000]
 
                 if event.message.media:
                     file_path = await self.download_media(event.message)
@@ -106,8 +152,12 @@ class TelegramBridge(commands.Cog):
             return
 
         try:
+            content = format_telegram_message(
+                event.message.message,
+                event.message.entities
+            )[:2000]
             discord_msg = await channel.fetch_message(discord_id)
-            await discord_msg.edit(content=event.message.message or "")
+            await discord_msg.edit(content=content)
         except Exception as e:
             print(f"Ошибка редактирования в Discord: {e}")
 
