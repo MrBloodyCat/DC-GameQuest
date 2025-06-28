@@ -35,13 +35,14 @@ bot.load_extension("commands.telegram_cog") # Папка с подключени
 
 bot.load_extension("commands.messages_cog") # Папка с сообщениями от бота
 
-bot.load_extension("commands.ember_cog") # Папка с ембитам для отпраки
+bot.load_extension("commands.ember_cog") # Папка с ембитам для отправки
 
 bot.load_extension("commands.events_cog") # Папка с событиями на сервере и боте
 
 bot.load_extension("commands.reaction_cog") # Папка с рекциями на сообщения
 
+bot.load_extension("commands.moderation_cog") # Папка с модерацией
+
 # Запуск
 if __name__ == "__main__":
     bot.run(discord_bot)
-
