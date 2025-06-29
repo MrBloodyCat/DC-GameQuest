@@ -1,5 +1,6 @@
 import disnake
 import os
+import datetime
 from dotenv import load_dotenv
 from disnake.ext import commands
 from BANNED_FILES.config import discord_bot
@@ -18,6 +19,8 @@ intents.guilds = True
 
 # Инициализация бота
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+bot.start_time = datetime.datetime.utcnow()
 
 # Событие при запуске
 @bot.event
