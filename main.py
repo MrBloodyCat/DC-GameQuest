@@ -41,7 +41,9 @@ bot.load_extension("commands.events_cog") # Папка с событиями н�
 
 bot.load_extension("commands.reaction_cog") # Папка с рекциями на сообщения
 
-bot.load_extension("commands.moderation_cog") # Папка с модерацией
+bot.load_extension("commands.moderation_cog") # Папка с модерацией на сервере и в боте
+
+bot.load_extension("commands.information_cog") # Папка с информация о сервере
 
 # Запуск
 if __name__ == "__main__":
