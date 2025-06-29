@@ -31,7 +31,7 @@ class AutoPromo(commands.Cog):
             embed = disnake.Embed(
                 title="<:aiusers:1388576262355943434> Оперативная сводка по социальным платформам",
                 description=(
-                    "Товарищи лейтенанты! Штаб **Game Quest** напоминает о необходимости **контроля** всех секторов информационного фронта!\n\n"
+                    "Товарищи лейтенанты! Команда **Game Quest** напоминает о необходимости **контроля** всех секторов информационного фронта!\n\n"
                     "<:youtube:1385657711110393856> **YouTube:** https://www.youtube.com/@GameQuest_news\n"
                     "<:tg:1388590213567221801> **Telegram:** https://t.me/GameQuest_news\n"
                     "<:dc:1388590201349079050> **Discord:** https://discord.gg/GJUuPRbN5a\n"
@@ -49,7 +49,7 @@ class AutoPromo(commands.Cog):
             embed = disnake.Embed(
                 title="<:userai:1388576282538807487> Мониторинг добровольных пожертвований",
                 description=(
-                    "Товарищи лейтенанты! Штаб **Game Quest** напоминает что ваш вклад в операцию по развитию **укрепляет** наши позиции на информационном фронте!\n\n"
+                    "Товарищи лейтенанты! Команда **Game Quest** напоминает что ваш вклад в операцию по развитию **укрепляет** наши позиции на информационном фронте!\n\n"
                     "<:wallet:1388579605379682438> **Patreon:**\n https://www.patreon.com/andremuhamad\n"
                     "<:wallet:1388579605379682438> **DonationAlerts:**\n https://www.donationalerts.com/r/andremuhamad"
                 ),
