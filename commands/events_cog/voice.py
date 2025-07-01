@@ -1,7 +1,6 @@
 import disnake
 from disnake.ext import commands
 import aiohttp
-import io
 import logging
 from datetime import datetime, timedelta
 from BANNED_FILES.config import LOG_CHANNEL_ID, Embed_Color
@@ -13,8 +12,8 @@ class VoiceLogger(commands.Cog):
         self.log_channel_id = LOG_CHANNEL_ID
         self.webhook_cache = {}
         self.bot_avatar: bytes = b""
-        self.bot.loop.create_task(self.prepare())
         self.embed_color = disnake.Color(int(Embed_Color.lstrip("#"), 16))
+        self.bot.loop.create_task(self.prepare())
 
     async def prepare(self):
         await self.bot.wait_until_ready()
@@ -51,16 +50,15 @@ class VoiceLogger(commands.Cog):
 
         return None
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        if member.bot:
-            return
+    def get_rank(self, member: disnake.Member) -> str:
+        return "Сержант" if member.bot else "Лейтенант"
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member: disnake.Member, before: disnake.VoiceState, after: disnake.VoiceState):
         embed = disnake.Embed(color=self.embed_color)
 
-        # Время по МСК
         moscow_time = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
-
+        rank = self.get_rank(member)
         user_mention = f"<@{member.id}>"
 
         def channel_mention(ch):
@@ -69,27 +67,27 @@ class VoiceLogger(commands.Cog):
         if not before.channel and after.channel:
             embed.title = "<:callcalling:1386045379765735465> Подключение к оперативной сети"
             embed.description = (
-                f"Лейтенант {user_mention} десантировался в сектор. Оружие заряжено, юмор — тоже.\n\n"
+                f"{rank} {user_mention} десантировался в сектор. Оружие заряжено, юмор — тоже.\n\n"
                 f"<:channel:1386045423348613270> **Сектор:** {channel_mention(after.channel)}\n"
                 f"<:calendar:1386045347628974115> **Время подключения:** {moscow_time} по МСК\n\n"
             )
         elif before.channel and not after.channel:
             embed.title = "<:callslash:1386045391400599713> Исчез в радиопомехах"
             embed.description = (
-                f"Лейтенант {user_mention} вышел из радиуса действия. Возможно, перешёл на другую частоту.\n\n"
+                f"{rank} {user_mention} вышел из радиуса действия. Возможно, перешёл на другую частоту.\n\n"
                 f"<:channel:1386045423348613270> **Сектор:** {channel_mention(before.channel)}\n"
                 f"<:calendar:1386045347628974115> **Время отключения:** {moscow_time} по МСК\n\n"
             )
         elif before.channel != after.channel:
             embed.title = "<:calladd:1386045364586680501> Срочная эвакуация в другой войс"
             embed.description = (
-                f"Лейтенант {user_mention} рванул в другой сектор, как будто за ним гнался ПВО.\n\n"
+                f"{rank} {user_mention} рванул в другой сектор, как будто за ним гнался ПВО.\n\n"
                 f"<:channel:1386045423348613270> **Старый сектор:** {channel_mention(before.channel)}\n"
                 f"<:channeladd:1386045408115163287> **Новый сектор:** {channel_mention(after.channel)}\n"
                 f"<:calendar:1386045347628974115> **Время переключения:** {moscow_time} по МСК\n\n"
             )
         else:
-            return  # Нет изменений
+            return
 
         await self.send_voice_log(member.guild, embed)
 
@@ -111,7 +109,8 @@ class VoiceLogger(commands.Cog):
             await webhook.send(
                 embed=embed,
                 username=f"{self.bot.user.name}_Voice",
-                allowed_mentions=disnake.AllowedMentions(users=True)  # разрешаем упоминания
+                avatar_url=self.bot.user.avatar.url if self.bot.user.avatar else None,
+                allowed_mentions=disnake.AllowedMentions(users=True)
             )
         except disnake.Forbidden:
             logging.error("Недостаточно прав для отправки сообщения через вебхук")

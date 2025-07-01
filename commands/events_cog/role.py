@@ -50,9 +50,13 @@ class RoleUpdateLogger(commands.Cog):
 
         return None
 
+    def get_rank(self, member: disnake.Member) -> str:
+        return "сержант" if member.bot else "лейтенант"
+
     @commands.Cog.listener()
     async def on_member_update(self, before: disnake.Member, after: disnake.Member):
-        if before.roles == after.roles or after.bot:
+        # Убираем проверку на after.bot, чтобы логировать изменения у ботов тоже
+        if before.roles == after.roles:
             return
 
         added_roles = [role.mention for role in after.roles if role not in before.roles]
@@ -71,13 +75,16 @@ class RoleUpdateLogger(commands.Cog):
         except Exception as e:
             logging.warning(f"[AuditLog] Ошибка при получении логов аудита: {e}")
 
+        rank = self.get_rank(after)
         embed = disnake.Embed(color=self.embed_color)
         moscow_time = (datetime.utcnow() + timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')
         user_mention = f"<@{after.id}>"
 
         embed.title = "<:securityuser:1387113332208566342> Перестановка в рядах специализация"
-        embed.description = f"У лейтенанта {user_mention} произошла **смена специализация**. {f'Ответственность за **операцию** лежала на офицере или его прямом подчинённом: <@{changer.id}>.' if changer else 'Ответственный офицер не был зафиксирован.'}"
-
+        embed.description = (
+            f"У {rank} {user_mention} произошла **смена специализация**. "
+            f"{f'Ответственность за **операцию** лежала на офицере или его прямом подчинённом: <@{changer.id}>.' if changer else 'Ответственный офицер не был зафиксирован.'}"
+        )
 
         roles_summary = ""
         if added_roles:
@@ -86,7 +93,7 @@ class RoleUpdateLogger(commands.Cog):
             roles_summary += f"<:shieldcross:1387113344908923125> **Удалены специализация:** {' '.join(removed_roles)}\n"
         roles_summary += f"**<:calendar:1386045347628974115> Время операции:** {moscow_time} по МСК"
 
-        embed.add_field(name="\u200b", value=roles_summary, inline=False)  # \u200b — пустой заголовок для поля
+        embed.add_field(name="\u200b", value=roles_summary, inline=False)  # пустой заголовок для поля
 
         await self.send_role_log(after.guild, embed)
 
