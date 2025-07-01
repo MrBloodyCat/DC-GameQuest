@@ -3,10 +3,10 @@ import asyncio
 import disnake
 from disnake.ext import commands
 from telethon import TelegramClient, events, types
+from telethon.sessions import SQLiteSession
 from telethon.tl.types import (MessageEntityBold, MessageEntityItalic, MessageEntityTextUrl, MessageEntityUrl, MessageEntityCode, MessageEntityPre, MessageEntityUnderline, MessageEntityStrike)
 from BANNED_FILES.config import (api_id, api_hash, telegram_bot, TELEGRAM_ID, TELEGRAM_DISCORD_CHANNEL_ID, Download_Temp)
 
-telegram_client = TelegramClient("telegram_session", api_id, api_hash)
 
 def format_telegram_message(message_text, entities):
     if not entities or not message_text:
@@ -16,7 +16,6 @@ def format_telegram_message(message_text, entities):
     for entity in sorted(entities, key=lambda e: e.offset, reverse=True):
         start = entity.offset
         end = entity.offset + entity.length
-
         segment = ''.join(text[start:end])
 
         if isinstance(entity, MessageEntityBold):
@@ -38,6 +37,7 @@ def format_telegram_message(message_text, entities):
 
     return ''.join(text)
 
+
 class TelegramBridge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -49,12 +49,22 @@ class TelegramBridge(commands.Cog):
     async def init_telegram(self):
         await self.bot.wait_until_ready()
         try:
+            session = SQLiteSession("telegram_session")
+            session.set_timeout(30)
+            session.set_db_wal_mode(True)
+
+            global telegram_client
+            telegram_client = TelegramClient(session, api_id, api_hash)
+
             await telegram_client.start(bot_token=telegram_bot)
+
             telegram_client.add_event_handler(self.handle_new_message, events.NewMessage(chats=TELEGRAM_ID))
             telegram_client.add_event_handler(self.handle_edit, events.MessageEdited(chats=TELEGRAM_ID))
             telegram_client.add_event_handler(self.handle_delete, events.MessageDeleted(chats=TELEGRAM_ID))
-            print("Telegram client started successfully!")
+
+            print("Telegram client started successfully with WAL mode and timeout!")
             asyncio.create_task(telegram_client.run_until_disconnected())
+
         except Exception as e:
             print(f"Telegram client start error: {e}")
 
