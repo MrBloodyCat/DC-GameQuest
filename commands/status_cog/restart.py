@@ -8,7 +8,7 @@ class ReloadAllCog(commands.Cog):
         self.bot = bot
         self.embed_color = disnake.Color(int(Embed_Color.lstrip("#"), 16))
 
-    @commands.slash_command(name="перезагрузка", description="Тактическая перезагрузка сержанта")
+    @commands.slash_command(name="перезагрузка", description="Обновление конфигурации сержанта")
     async def reload_all(self, inter: disnake.AppCmdInter):
         await inter.response.defer(ephemeral=True)
 

@@ -9,7 +9,7 @@ class ServerInfo(commands.Cog):
         self.bot = bot
         self.embed_color = disnake.Color(int(Embed_Color.lstrip("#"), 16))
 
-    @commands.slash_command(name="сервер", description="Провести тактическое сканирование серверной инфраструктуры")
+    @commands.slash_command(name="сервер", description="Сканирование серверной инфраструктуры")
     async def serverinfo(self, inter: disnake.AppCmdInter):
         await inter.response.defer() 
 
