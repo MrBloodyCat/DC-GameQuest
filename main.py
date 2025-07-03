@@ -48,6 +48,9 @@ bot.load_extension("commands.moderation_cog") # Папка с модерацие
 
 bot.load_extension("commands.information_cog") # Папка с информация о сервере
 
+bot.load_extension("commands.secrecy_cog") # Папка с секретными командами
+
+
 # Запуск
 if __name__ == "__main__":
     bot.run(discord_bot)
