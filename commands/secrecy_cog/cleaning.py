@@ -2,7 +2,7 @@ import disnake
 from disnake.ext import commands
 import asyncio
 from datetime import datetime, timedelta
-from BANNED_FILES.config import Embed_Color, Message_Cleaning
+from BANNED_FILES.config import Embed_Color, Message_Cleaning, ALLOWED_USER_IDS
 
 class CleanCommand(commands.Cog):
     def __init__(self, bot):
@@ -12,6 +12,10 @@ class CleanCommand(commands.Cog):
     @commands.command(name="зачистка", help="Зачистка канала связи")
     @commands.has_permissions(manage_messages=True)
     async def purge_channel(self, ctx: commands.Context):
+        # Проверка разрешения по списку
+        if ctx.author.id not in ALLOWED_USER_IDS:
+            return  # Игнорируем команду если пользователя нет в списке
+
         try:
             await ctx.channel.purge(limit=Message_Cleaning)
 
@@ -21,7 +25,7 @@ class CleanCommand(commands.Cog):
                 title="<:infocircle:1390374048650760324>  Доклад о выполненной очистке канала связи",
                 description=(
                     f"```Согласно оперативному распоряжению командования, проведена полная нейтрализация информационного шума. Передача данных восстановлена.```\n"
-                    f"<:calendar:1386045347628974115> **Отметка времени:** {moscow_time} по МСК"
+                    f"<:calendar:1386045347628974115> **Время доклада:** {moscow_time} по МСК"
                 ),
                 color=self.embed_color
             )
