@@ -1,0 +1,78 @@
+import disnake
+from disnake.ext import commands
+import json
+import os
+import asyncio
+from datetime import datetime, timedelta
+from BANNED_FILES.config import Users_Notification, Embed_Color, Сomments_Gif
+
+class FirstNotifier(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self.embed_color = disnake.Color(int(Embed_Color.lstrip("#"), 16))
+        self.users_data = {}
+        self.lock = asyncio.Lock()
+
+        if os.path.exists(Users_Notification):
+            with open(Users_Notification, "r", encoding="utf-8") as f:
+                self.users_data = json.load(f)
+
+    @commands.Cog.listener()
+    async def on_message(self, message: disnake.Message):
+        if message.author.bot or message.guild is None:
+            return
+
+        user_id = str(message.author.id)
+        key = user_id
+
+        if key in self.users_data:
+            return
+
+        member = message.guild.get_member(message.author.id)
+        display_name = member.display_name if member else str(message.author)
+        username = str(message.author)
+
+        moscow_time = (datetime.utcnow() + timedelta(hours=3)).strftime("%Y-%m-%d %H:%M:%S по МСК")
+
+        async with self.lock:
+            self.users_data[key] = {
+                "username": username,
+                "user_id": user_id,
+                "first_message_time": moscow_time,
+                "first_message_content": message.content
+            }
+            with open(Users_Notification, "w", encoding="utf-8") as f:
+                json.dump(self.users_data, f, ensure_ascii=False, indent=4)
+
+        # EMBED
+        embed = disnake.Embed(
+            title=f"<:smartcursor:1385947235530834052> Зафиксирован первичный радиосигнал",
+            description=(
+                f"**Здравия желаю**, лейтенант **{display_name}**, вы официально подключились к боевому информационному каналу **Game Quest**. Отныне координация операций, "
+                "сбор разведданных и анализ обстановки **находятся** в вашей зоне ответственности.\n\n"
+                f"<:youtube:1385657711110393856> **YouTube:** https://www.youtube.com/@GameQuest_news\n"
+                f"<:tg:1388590213567221801> **Telegram:** https://t.me/GameQuest_news\n"
+                f"<:dc:1388590201349079050> **Discord:** https://discord.gg/GJUuPRbN5a\n"
+                f"<:vk:1385657735793742097> **ВКонтакте:** https://vk.com/GameQuest_news\n\n"
+                f"<:calendar:1386045347628974115> **Время регистрации:** {moscow_time}\n"
+            ),
+            color=self.embed_color
+        )
+        embed.set_footer(text="Благодарим за проявленный интерес к нашему спецпроекту!")
+
+        # GIF добавление
+        gif_path = os.path.abspath(Сomments_Gif)
+
+        try:
+            if os.path.exists(gif_path):
+                with open(gif_path, "rb") as gif:
+                    file = disnake.File(gif, filename="messages.gif")
+                    embed.set_image(url="attachment://messages.gif")
+                    await message.author.send(embed=embed, file=file)
+            else:
+                await message.author.send(embed=embed)
+        except disnake.Forbidden:
+            pass
+        except Exception as e:
+            print(f"[Ошибка] Не удалось отправить embed или гифку: {e}")
+        
