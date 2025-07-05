@@ -17,7 +17,7 @@ class GreetingResponder(commands.Cog):
         content_lower = message.content.lower()
         if any(content_lower.startswith(greet) for greet in self.greetings):
             embed = disnake.Embed(
-                title="<:aiac:1385734556828565544> Здравия желаю, лейтенант!",
+                title="<:aiac:1390972515295170600> Здравия желаю, лейтенант!",
                 description=(
                     "Мы рады видеть **вас** здесь и надеемся, что ваше время "
                     "пребывания будет приятным и наполненным позитивом.\n\n"

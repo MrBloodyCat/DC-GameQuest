@@ -29,7 +29,7 @@ class WelcomeHandler(commands.Cog):
 
         # Создание Embed
         embed = disnake.Embed(
-            title=f"<:enhance:1385754927212662948> Здравия желаю, {member.display_name}",
+            title=f"<:enhance:1390972267504210062> Здравия желаю, {member.display_name}",
             description=(
                 "Обязательно **ознакомьтесь** с правилами сервера, чтобы не пропустить важную информацию. "
                 "**Исследуйте** разделы навигации для **поиска** дополнительного увлекательного контента.\n\n"

@@ -32,10 +32,10 @@ class AutoPromo(commands.Cog):
                 title="<:aiusers:1388576262355943434> Оперативная сводка по социальным платформам",
                 description=(
                     "Товарищи лейтенанты! Команда **Game Quest** напоминает о необходимости **контроля** всех секторов информационного фронта!\n\n"
-                    "<:youtube:1385657711110393856> **YouTube:** https://www.youtube.com/@GameQuest_news\n"
+                    "<:youtube:1390972086876377192> **YouTube:** https://www.youtube.com/@GameQuest_news\n"
                     "<:tg:1388590213567221801> **Telegram:** https://t.me/GameQuest_news\n"
                     "<:dc:1388590201349079050> **Discord:** https://discord.gg/GJUuPRbN5a\n"
-                    "<:vk:1385657735793742097> **ВКонтактe:** https://t.me/GameQuest_news"
+                    "<:vk:1390972535298068570> **ВКонтактe:** https://t.me/GameQuest_news"
                 ),
                 color=self.embed_color
             )

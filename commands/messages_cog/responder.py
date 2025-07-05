@@ -15,7 +15,7 @@ class DMResponder(commands.Cog):
         if isinstance(message.channel, disnake.DMChannel):
             file = disnake.File(Community_Image, filename="community.png")  # локальный файл с картинкой
             embed = disnake.Embed(
-                title="<:aicomment:1385718618091819160> Штабное сообщение от Сержанта",
+                title="<:aicomment:1390972485410881588> Штабное сообщение от Сержанта",
                 description=(
                     ">>> Бот в данный момент **выполняет** боевую задачу на основном сервере. "
                     "Ответ временно невозможен, **благодарим** за понимание."
@@ -23,7 +23,7 @@ class DMResponder(commands.Cog):
                 color=self.embed_color
             )
             embed.add_field(
-                name="<:aitag:1385718639805599824> Цель операции:",
+                name="<:aitag:1390972454465175624> Цель операции:",
                 value="[Присоединиться к серверу](https://discord.gg/nQGvVAEw5r)",
                 inline=False
             )

@@ -91,7 +91,7 @@ class RoleUpdateLogger(commands.Cog):
             roles_summary += f"<:shieldtick:1387113358389547138> **Добавлены специализация:** {' '.join(added_roles)}\n"
         if removed_roles:
             roles_summary += f"<:shieldcross:1387113344908923125> **Удалены специализация:** {' '.join(removed_roles)}\n"
-        roles_summary += f"**<:calendar:1386045347628974115> Время операции:** {moscow_time} по МСК"
+        roles_summary += f"<:calendar:1390972430780203058> **Время операции:** {moscow_time} по МСК"
 
         embed.add_field(name="\u200b", value=roles_summary, inline=False)  # пустой заголовок для поля
 

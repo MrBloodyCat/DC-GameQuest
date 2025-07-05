@@ -25,7 +25,7 @@ class MentionResponse(commands.Cog):
             uptime_str = f"{days}д {hours}ч {minutes}м {seconds}с"
 
             embed = disnake.Embed(
-                title=f"<:airdrop:1385690982170886214> Штаб зафиксировал ваше имя — {message.author.display_name}!",
+                title=f"<:airdrop:1390972469073936414> Штаб зафиксировал ваше имя — {message.author.display_name}!",
                 description=(
                     "Здравия желаю! Я здесь и всегда готов **помочь** и внести вклад в проект **Game Quest**.\n\n"
                     f">>> Мой военный пинг: `{latency} мс`\n"

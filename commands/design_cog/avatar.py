@@ -17,7 +17,7 @@ class AvatarView(disnake.ui.View):
         name = self.member.display_name if self.member else self.user.name
 
         embed = disnake.Embed(
-            title=f"<:taguser:1385682903710699753> Голограмма — {name}",
+            title=f"<:taguser:1390972104295579688> Голограмма — {name}",
             description=description,
             color=self.embed_color
         )
@@ -36,7 +36,7 @@ class AvatarView(disnake.ui.View):
             name = self.user.name
 
         embed = disnake.Embed(
-            title=f"<:taguser:1385682903710699753> Голограмма — {name}",
+            title=f"<:taguser:1390972104295579688> Голограмма — {name}",
             description=description,
             color=self.embed_color
         )
@@ -64,7 +64,7 @@ class AvatarCommands(commands.Cog):
             name = user.name
 
         embed = disnake.Embed(
-            title=f"<:taguser:1385682903710699753> Голограмма — {name}",
+            title=f"<:taguser:1390972104295579688> Голограмма — {name}",
             description=description,
             color=self.embed_color
         )

@@ -25,7 +25,7 @@ class MusicIntegration(commands.Cog):
         file = disnake.File(Music_Image, filename=self.embed_image_filename)
 
         embed = disnake.Embed(
-            title="<:playlis:1385657627228377089> Сейчас в эфире — наш персональный хит!",
+            title="<:playlis:1390972178622582856> Сейчас в эфире — наш персональный хит!",
             description=f"Тот самый бит, от которого дрожат стёкла:\n> **{clean_name}**",
             color=self.embed_color
         )

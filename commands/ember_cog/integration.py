@@ -31,7 +31,7 @@ class IntegrationAnnouncer(commands.Cog):
 
         if not has_access:
             embed = disnake.Embed(
-                title="<:slash:1390947692305322014> Доступ к команде заблокирован",
+                title="<:forbidden:1390972224436965386> Доступ к команде заблокирован",
                 description=(
                     "У вас **отсутствуют полномочия** для выполнения данного приказа.\n\n"
                     ">>> Если вы считаете, что это ошибка — немедленно свяжитесь с адмиралом базы: "
@@ -57,8 +57,8 @@ class IntegrationAnnouncer(commands.Cog):
             color=self.embed_color
         )
         embed.set_image(url=превью)
-        embed.add_field(name="<:youtube:1385657711110393856> YouTube:", value=youtube, inline=False)
-        embed.add_field(name="<:vk:1385657735793742097> ВКонтакте:", value=vkontakte, inline=False)
+        embed.add_field(name="<:youtube:1390972086876377192> YouTube:", value=youtube, inline=False)
+        embed.add_field(name="<:vk:1390972535298068570> ВКонтакте:", value=vkontakte, inline=False)
         embed.set_footer(text="Благодарим за проявленный интерес к нашему спецпроекту!")
 
         # Отправка в канал

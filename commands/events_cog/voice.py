@@ -68,23 +68,23 @@ class VoiceLogger(commands.Cog):
             embed.title = "<:callcalling:1386045379765735465> Подключение к оперативной сети"
             embed.description = (
                 f"{rank} {user_mention} десантировался в сектор. Оружие заряжено, юмор — тоже.\n\n"
-                f"<:channel:1386045423348613270> **Сектор:** {channel_mention(after.channel)}\n"
-                f"<:calendar:1386045347628974115> **Время подключения:** {moscow_time} по МСК\n\n"
+                f"<:channel:1390972349385281630> **Сектор:** {channel_mention(after.channel)}\n"
+                f"<:calendar:1390972430780203058> **Время подключения:** {moscow_time} по МСК\n\n"
             )
         elif before.channel and not after.channel:
             embed.title = "<:callslash:1386045391400599713> Исчез в радиопомехах"
             embed.description = (
                 f"{rank} {user_mention} вышел из радиуса действия. Возможно, перешёл на другую частоту.\n\n"
-                f"<:channel:1386045423348613270> **Сектор:** {channel_mention(before.channel)}\n"
-                f"<:calendar:1386045347628974115> **Время отключения:** {moscow_time} по МСК\n\n"
+                f"<:channel:1390972349385281630> **Сектор:** {channel_mention(before.channel)}\n"
+                f"<:calendar:1390972430780203058> **Время отключения:** {moscow_time} по МСК\n\n"
             )
         elif before.channel != after.channel:
             embed.title = "<:calladd:1386045364586680501> Срочная эвакуация в другой войс"
             embed.description = (
                 f"{rank} {user_mention} рванул в другой сектор, как будто за ним гнался ПВО.\n\n"
-                f"<:channel:1386045423348613270> **Старый сектор:** {channel_mention(before.channel)}\n"
-                f"<:channeladd:1386045408115163287> **Новый сектор:** {channel_mention(after.channel)}\n"
-                f"<:calendar:1386045347628974115> **Время переключения:** {moscow_time} по МСК\n\n"
+                f"<:channel:1390972349385281630> **Старый сектор:** {channel_mention(before.channel)}\n"
+                f"<:channeladd:1390972291604545556> **Новый сектор:** {channel_mention(after.channel)}\n"
+                f"<:calendar:1390972430780203058> **Время переключения:** {moscow_time} по МСК\n\n"
             )
         else:
             return

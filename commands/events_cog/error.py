@@ -106,7 +106,7 @@ class StreamDuplicator:
             title="<:cpusetting:1387061989179658271> Критический отчёт системы военной связи",
             description=(
                 f"```{description}```\n"
-                f"<:calendar:1386045347628974115> **Время отчёта:** {moscow_time} по МСК"
+                f"<:calendar:1390972430780203058> **Время отчёта:** {moscow_time} по МСК"
             ),
             color=disnake.Color(int(Embed_Color.lstrip("#"), 16))
         )

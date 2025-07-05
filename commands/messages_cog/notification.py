@@ -46,14 +46,14 @@ class FirstNotifier(commands.Cog):
 
         # EMBED
         embed = disnake.Embed(
-            title=f"<:smartcursor:1385947235530834052> Зафиксирован первичный радиосигнал",
+            title=f"<:smart:1390972121768923166> Зафиксирован первичный радиосигнал",
             description=(
                 f"**Здравия желаю**, лейтенант **{display_name}**, вы официально подключились к боевому информационному каналу **Game Quest**. Отныне координация операций, "
                 "сбор разведданных и анализ обстановки **находятся** в вашей зоне ответственности.\n\n"
-                f"<:youtube:1385657711110393856> **YouTube:** https://www.youtube.com/@GameQuest_news\n"
+                f"<:youtube:1390972086876377192> **YouTube:** https://www.youtube.com/@GameQuest_news\n"
                 f"<:tg:1388590213567221801> **Telegram:** https://t.me/GameQuest_news\n"
                 f"<:dc:1388590201349079050> **Discord:** https://discord.gg/GJUuPRbN5a\n"
-                f"<:vk:1385657735793742097> **ВКонтакте:** https://vk.com/GameQuest_news\n\n"
+                f"<:vk:1390972535298068570> **ВКонтакте:** https://vk.com/GameQuest_news\n\n"
                 f"<:calendar:1386045347628974115> **Время регистрации:** {moscow_time}\n"
             ),
             color=self.embed_color
