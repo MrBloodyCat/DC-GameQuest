@@ -54,7 +54,7 @@ class FirstNotifier(commands.Cog):
                 f"<:tg:1388590213567221801> **Telegram:** https://t.me/GameQuest_news\n"
                 f"<:dc:1388590201349079050> **Discord:** https://discord.gg/GJUuPRbN5a\n"
                 f"<:vk:1390972535298068570> **ВКонтакте:** https://vk.com/GameQuest_news\n\n"
-                f"<:calendar:1386045347628974115> **Время регистрации:** {moscow_time}\n"
+                f"<:calendar:1390972430780203058> **Время регистрации:** {moscow_time}\n"
             ),
             color=self.embed_color
         )
