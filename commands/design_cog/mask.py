@@ -33,7 +33,7 @@ class ProAvatar(commands.Cog):
             color=self.embed_color
         )
         embed.set_image(url="attachment://GameQuest_Camouflage.png")
-        embed.set_footer(text=f"🖼️ {current_index + 1} / {len(self.avatars)} — голограм от команди {inter.guild.name}")
+        embed.set_footer(text=f"{current_index + 1} / {len(self.avatars)} — голограм от команди {inter.guild.name}")
 
         view = PromoAvatar(self.avatars, current_index, self.embed_color, inter.guild.name, username)
         await inter.response.send_message(embed=embed, file=file, view=view)
