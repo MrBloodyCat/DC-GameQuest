@@ -50,6 +50,8 @@ bot.load_extension("commands.information_cog") # Папка с информац�
 
 bot.load_extension("commands.secrecy_cog") # Папка с секретными командами
 
+bot.load_extension("commands.primary_cog") # Папка с особо-основными командами
+
 
 # Запуск
 if __name__ == "__main__":
