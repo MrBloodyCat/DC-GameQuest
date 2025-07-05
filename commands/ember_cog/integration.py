@@ -1,14 +1,19 @@
 import disnake
 from disnake.ext import commands
-from BANNED_FILES.config import Embed_Color, Video_Text, VIDEO_CHANNEL_ID  # добавляем ID канала
+from BANNED_FILES.config import Embed_Color, Video_Text, VIDEO_CHANNEL_ID, GROUP_MODER_ID
 
 class IntegrationAnnouncer(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.embed_color = disnake.Color(int(Embed_Color.lstrip("#"), 16))
-        self.static_header = Video_Text  # Статичное верхнее сообщение
+        self.static_header = Video_Text
 
-    @commands.slash_command(name="видео", description="Отправить интеграцию в youtube-дайджесты")
+    @commands.slash_command(
+        name="видео",
+        description="Отправить интеграцию в youtube-дайджесты",
+        dm_permission=False,
+        default_member_permissions=disnake.Permissions(manage_messages=True)  # видимость ограничена
+    )
     async def видео(
         self,
         ctx: disnake.ApplicationCommandInteraction,
@@ -17,17 +22,38 @@ class IntegrationAnnouncer(commands.Cog):
         youtube: str,
         vkontakte: str
     ):
-        """Отправляет embed с заголовком, изображением и ссылками на YouTube и ВКонтакте."""
+        # Проверка наличия роли
+        has_access = (
+            any(role.id in GROUP_MODER_ID for role in ctx.author.roles)
+            if isinstance(GROUP_MODER_ID, list)
+            else any(role.id == GROUP_MODER_ID for role in ctx.author.roles)
+        )
 
-        # Получение канала по ID
-        канал = self.bot.get_channel(VIDEO_CHANNEL_ID)
-        if not канал:
-            await ctx.response.send_message("Канал не найден. Проверь VIDEO_CHANNEL_ID.", ephemeral=True)
+        if not has_access:
+            embed = disnake.Embed(
+                title="<:slash:1390947692305322014> Доступ к команде заблокирован",
+                description=(
+                    "У вас **отсутствуют полномочия** для выполнения данного приказа.\n\n"
+                    ">>> Если вы считаете, что это ошибка — немедленно свяжитесь с адмиралом базы: "
+                    f"{ctx.guild.owner.mention}"
+                ),
+                color=self.embed_color
+            )
+
+            await ctx.response.send_message(embed=embed, ephemeral=True)
             return
 
-        # Создание Embed
+        # Получение канала
+        канал = self.bot.get_channel(VIDEO_CHANNEL_ID)
+        if not канал:
+            await ctx.response.send_message(
+                "❌ Канал не найден. Проверь VIDEO_CHANNEL_ID.", ephemeral=True
+            )
+            return
+
+        # Формирование Embed
         embed = disnake.Embed(
-            title=f"{название}",
+            title=название,
             color=self.embed_color
         )
         embed.set_image(url=превью)
@@ -35,11 +61,11 @@ class IntegrationAnnouncer(commands.Cog):
         embed.add_field(name="<:vk:1385657735793742097> ВКонтакте:", value=vkontakte, inline=False)
         embed.set_footer(text="Благодарим за проявленный интерес к нашему спецпроекту!")
 
-        # Отправка сообщения
+        # Отправка в канал
         await канал.send(content=self.static_header, embed=embed)
 
         # Ответ пользователю
         await ctx.response.send_message(
-            f"Интеграция успешно отправлена в {канал.mention}",
+            f"📡 Интеграция успешно отправлена в {канал.mention}",
             ephemeral=True
         )

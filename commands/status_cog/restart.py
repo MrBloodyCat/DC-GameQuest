@@ -1,22 +1,46 @@
 import disnake
 from disnake.ext import commands
 import os
-from BANNED_FILES.config import Embed_Color, Reboot_Gif
+from BANNED_FILES.config import Embed_Color, Reboot_Gif, GROUP_ADMIN_ID
 
 class ReloadAllCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.embed_color = disnake.Color(int(Embed_Color.lstrip("#"), 16))
 
-    @commands.slash_command(name="перезагрузка", description="Обновление конфигурации сержанта")
+    @commands.slash_command(
+        name="перезагрузка",
+        description="Обновление конфигурации сержанта",
+        dm_permission=False,
+        default_member_permissions=disnake.Permissions(manage_guild=True)
+    )
     async def reload_all(self, inter: disnake.AppCmdInter):
+        # Проверка доступа
+        has_access = (
+            any(role.id in GROUP_ADMIN_ID for role in inter.author.roles)
+            if isinstance(GROUP_ADMIN_ID, list)
+            else any(role.id == GROUP_ADMIN_ID for role in inter.author.roles)
+        )
+
+        if not has_access:
+            embed = disnake.Embed(
+                title="<:slash:1390947692305322014> Доступ к команде заблокирован",
+                description=(
+                    "У вас **отсутствуют полномочия** для выполнения данного приказа.\n\n"
+                    ">>> Если вы считаете, что это ошибка — немедленно свяжитесь с адмиралом базы: "
+                    f"{inter.guild.owner.mention}"
+                ),
+                color=self.embed_color
+            )
+            await inter.response.send_message(embed=embed, ephemeral=True)
+            return
+
         await inter.response.defer(ephemeral=True)
 
         base_dir = os.path.join(os.getcwd(), "commands")
         errors = []
         success = []
 
-        # Проверяем наличие гифки
         gif_path = Reboot_Gif
         gif_attached = os.path.exists(gif_path)
         file = disnake.File(gif_path, filename="reload.gif") if gif_attached else None
@@ -36,29 +60,29 @@ class ReloadAllCog(commands.Cog):
 
         embed = disnake.Embed(
             title="<:cloudchange:1388950504297726113> Тактическая перезагрузка завершена",
-            description="> По данным состояние боевых когов оценивается как **стабильно напряжённое**."
-                        " Наблюдается планомерное выполнение поставленных **задач** при сохранении постоянной боеготовности.",
+            description=(
+                "> По данным, состояние боевых когов оценивается как **стабильно напряжённое**.\n"
+                "Наблюдается планомерное выполнение поставленных **задач** при сохранении постоянной боеготовности."
+            ),
             color=self.embed_color
         )
 
         if success:
             embed.add_field(
-                name="<:chartsuccess:1388950545733124106> Успешно восстановлены:\n\n",
+                name="<:chartsuccess:1388950545733124106> Успешно восстановлены:",
                 value="\n".join(success),
                 inline=False
             )
 
         if errors:
             embed.add_field(
-                name="<:chartfail:1388950527165075517> Обнаружены сбои:\n\n",
+                name="<:chartfail:1388950527165075517> Обнаружены сбои:",
                 value="\n".join(errors),
                 inline=False
             )
 
         embed.set_footer(text="Благодарим за проявленный интерес к нашему спецпроекту!")
-
         if gif_attached:
-            embed.set_image(url="attachment://reload.gif")  # Внизу эмбеда как картинка
+            embed.set_image(url="attachment://reload.gif")
 
         await inter.edit_original_response(embed=embed, file=file if gif_attached else None)
-
