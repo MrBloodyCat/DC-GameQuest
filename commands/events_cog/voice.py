@@ -65,21 +65,21 @@ class VoiceLogger(commands.Cog):
             return f"<#{ch.id}>" if ch else "—"
 
         if not before.channel and after.channel:
-            embed.title = "<:callcalling:1386045379765735465> Подключение к оперативной сети"
+            embed.title = "<:callcalling:1390972394268659753> Подключение к оперативной сети"
             embed.description = (
                 f"{rank} {user_mention} десантировался в сектор. Оружие заряжено, юмор — тоже.\n\n"
                 f"<:channel:1390972349385281630> **Сектор:** {channel_mention(after.channel)}\n"
                 f"<:calendar:1390972430780203058> **Время подключения:** {moscow_time} по МСК\n\n"
             )
         elif before.channel and not after.channel:
-            embed.title = "<:callslash:1386045391400599713> Исчез в радиопомехах"
+            embed.title = "<:callslash:1390972370508054578> Исчез в радиопомехах"
             embed.description = (
                 f"{rank} {user_mention} вышел из радиуса действия. Возможно, перешёл на другую частоту.\n\n"
                 f"<:channel:1390972349385281630> **Сектор:** {channel_mention(before.channel)}\n"
                 f"<:calendar:1390972430780203058> **Время отключения:** {moscow_time} по МСК\n\n"
             )
         elif before.channel != after.channel:
-            embed.title = "<:calladd:1386045364586680501> Срочная эвакуация в другой войс"
+            embed.title = "<:calladd:1390972416452202596> Срочная эвакуация в другой войс"
             embed.description = (
                 f"{rank} {user_mention} рванул в другой сектор, как будто за ним гнался ПВО.\n\n"
                 f"<:channel:1390972349385281630> **Старый сектор:** {channel_mention(before.channel)}\n"
