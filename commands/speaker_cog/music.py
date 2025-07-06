@@ -3,8 +3,12 @@ import random
 import asyncio
 import subprocess
 import disnake
+import logging
 from disnake.ext import commands, tasks
-from BANNED_FILES.config import SPEAKER_VOICE_ID, Music_Folder, Volume_Music  # Ffmpeg_Path
+from BANNED_FILES.config import SPEAKER_VOICE_ID, Music_Folder, Volume_Music  # , Ffmpeg_Path
+
+# 🔇 Отключаем спам от Disnake
+logging.getLogger("disnake.voice_client").setLevel(logging.CRITICAL)
 
 class MusicPlayer(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -13,9 +17,16 @@ class MusicPlayer(commands.Cog):
         self.music_folder = Music_Folder
         self.volume = Volume_Music
         # self.ffmpeg_path = Ffmpeg_Path
-        self.integration_cog = None  # Для обращения к MusicIntegration
-        self.last_disconnect_time: float | None = None  # 🆕 фиксируем время выхода
+        self.integration_cog = None
+        self.last_disconnect_time: float | None = None
         self.auto_reconnect.start()
+
+    def is_disconnected(self) -> bool:
+        return (
+            self.voice_client is None
+            or not self.voice_client.is_connected()
+            or self.voice_client.channel is None
+        )
 
     async def connect_and_play(self):
         if self.integration_cog is None:
@@ -23,39 +34,37 @@ class MusicPlayer(commands.Cog):
 
         voice_channel = self.bot.get_channel(SPEAKER_VOICE_ID)
         if not isinstance(voice_channel, disnake.VoiceChannel):
-            print("Голосовой канал не найден или невалидный.")
             return
 
-        # 🕒 Если недавно выходил — ждём 30 сек
+        # Ждём 30 секунд если только что отключились
         if self.last_disconnect_time is not None:
-            time_since = asyncio.get_event_loop().time() - self.last_disconnect_time
-            if time_since < 30:
-                wait_time = 30 - time_since
-                print(f"Ожидание перед повторным входом: {int(wait_time)} сек.")
-                await asyncio.sleep(wait_time)
+            elapsed = asyncio.get_event_loop().time() - self.last_disconnect_time
+            if elapsed < 30:
+                await asyncio.sleep(30 - elapsed)
 
         try:
-            if self.voice_client is None or not self.voice_client.is_connected():
+            if self.voice_client and self.voice_client.is_connected():
+                if self.voice_client.channel.id != voice_channel.id:
+                    await self.voice_client.move_to(voice_channel)
+            else:
                 self.voice_client = await voice_channel.connect()
-                if self.integration_cog:
-                    await self.integration_cog.send_or_update_message("Ожидание пожалуста музыки...")
-            elif self.voice_client.channel.id != voice_channel.id:
-                await self.voice_client.move_to(voice_channel)
+
+            if self.integration_cog:
+                await self.integration_cog.send_or_update_message("Ожидание пожалуста музыки....")
         except disnake.ClientException:
             return
 
-        await asyncio.sleep(15)  # Задержка перед началом воспроизведения
+        await asyncio.sleep(15)
 
         files = [f for f in os.listdir(self.music_folder) if f.endswith((".mp3", ".wav", ".ogg", ".aac"))]
         if not files:
-            print("Нет аудиофайлов для воспроизведения.")
             return
 
         while True:
-            if not self.voice_client or not self.voice_client.is_connected():
+            if self.is_disconnected():
                 if self.integration_cog:
                     await self.integration_cog.delete_message()
-                self.last_disconnect_time = asyncio.get_event_loop().time()  # 💾 фиксируем момент выхода
+                self.last_disconnect_time = asyncio.get_event_loop().time()
                 break
 
             file = random.choice(files)
@@ -63,29 +72,32 @@ class MusicPlayer(commands.Cog):
             if self.integration_cog:
                 await self.integration_cog.send_or_update_message(file)
 
-            source = disnake.FFmpegPCMAudio(
-                os.path.join(self.music_folder, file),
-                # executable=self.ffmpeg_path,
-                before_options='-hide_banner',
-                options='-loglevel error',
-                stderr=subprocess.DEVNULL
-            )
-            player = disnake.PCMVolumeTransformer(source, volume=self.volume)
-            self.voice_client.play(player)
+            try:
+                source = disnake.FFmpegPCMAudio(
+                    os.path.join(self.music_folder, file),
+                    # executable=self.ffmpeg_path,
+                    before_options='-hide_banner',
+                    options='-loglevel error',
+                    stderr=subprocess.DEVNULL
+                )
+                player = disnake.PCMVolumeTransformer(source, volume=self.volume)
+
+                self.voice_client.play(player)
+            except Exception:
+                self.last_disconnect_time = asyncio.get_event_loop().time()
+                break
 
             while self.voice_client.is_playing() or self.voice_client.is_paused():
                 await asyncio.sleep(1)
 
-    @tasks.loop(seconds=120)
+    @tasks.loop(seconds=30)
     async def auto_reconnect(self):
         voice_channel = self.bot.get_channel(SPEAKER_VOICE_ID)
-        if not isinstance(voice_channel, disnake.VoiceChannel):
-            return
-
-        if self.voice_client is None or not self.voice_client.is_connected():
-            if self.integration_cog:
-                await self.integration_cog.delete_message()
-            await self.connect_and_play()
+        if isinstance(voice_channel, disnake.VoiceChannel):
+            if self.is_disconnected():
+                if self.integration_cog:
+                    await self.integration_cog.delete_message()
+                await self.connect_and_play()
 
     @auto_reconnect.before_loop
     async def before_loop(self):
